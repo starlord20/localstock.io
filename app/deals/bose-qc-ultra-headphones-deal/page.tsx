@@ -2,6 +2,7 @@
 import { MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import Image from 'next/image';
 
 export default function BoseHeadphonesDealPage() {
