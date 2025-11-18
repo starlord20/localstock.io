@@ -1,7 +1,8 @@
 // app/page.tsx
+import { LocationButton } from "@/components/ui/location-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -34,10 +35,7 @@ export default function HomePage() {
       </form>
 
       <div className="flex items-center justify-center mt-6 space-x-4">
-        <Button variant="outline" type="button" className="h-10">
-          <MapPin className="mr-2 h-4 w-4" />
-          Use My Current Location
-        </Button>
+        <LocationButton />
         <span className="text-gray-500">or enter zip code</span>
       </div>
     </main>
