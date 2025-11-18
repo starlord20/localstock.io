@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { LocationButton } from "@/lib/location-utils";
+import { LocationButton } from "@/components/ui/location-button";
 
 // This is our MOCK DATA, simulating what the API will return.
 const mockResults = [
