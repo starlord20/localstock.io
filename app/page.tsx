@@ -54,6 +54,4 @@ export default function HomePage() {
       </div>
     </main>
   );
-  // Buy me a coffee script to be added in the future
-  // <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="localstockonline" data-description="Support me on Buy me a coffee!" data-message="Thanks for stopping by and for your support! A coffee would be much appreciated." data-color="#FF813F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 }

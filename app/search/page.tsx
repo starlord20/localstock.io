@@ -171,7 +171,7 @@ export default async function SearchPage({
                     <div className="flex items-center gap-3">
                       <div className="w-20 h-10 flex-shrink-0">
                         <Image
-                          src={product.source === 'Best Buy' ? '/logos/bestbuy.jpeg' : '/logos/walmart.svg'}
+                          src={product.source === 'Best Buy' ? '/logos/bestbuy.png' : '/logos/walmart.svg'}
                           alt={`${product.source} logo`}
                           width={80}
                           height={40}

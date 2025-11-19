@@ -164,7 +164,7 @@ export async function searchLocalStock(
 	const maxProductPages = 3;
 	const candidateSkus: number[] = [];
 	const showFields = [
-		'accessories.sku','addToCartUrl','bestSellingRank','categoryPath.id','categoryPath.name','color','condition','customerReviewAverage','customerReviewCount','description','details.name','details.value','dollarSavings','features.feature','freeShipping','frequentlyPurchasedWith.sku','image','includedItemList.includedItem','inStoreAvailability','inStoreAvailabilityText','longDescription','manufacturer','mobileUrl','modelNumber','name','onlineAvailability','onlineAvailabilityText','onSale','percentSavings','preowned','regularPrice','relatedProducts.sku','salePrice','shipping','shippingCost','shortDescription','sku','thumbnailImage','type','upc','url'
+		'accessories.sku','addToCartUrl','bestSellingRank','categoryPath.id','categoryPath.name','color','customerReviewAverage','customerReviewCount','description','details.name','details.value','dollarSavings','features.feature','freeShipping','frequentlyPurchasedWith.sku','image','includedItemList.includedItem','inStoreAvailability','inStoreAvailabilityText','longDescription','manufacturer','mobileUrl','modelNumber','name','onlineAvailability','onlineAvailabilityText','onSale','percentSavings','regularPrice','relatedProducts.sku','salePrice','shortDescription','sku','thumbnailImage','type','upc','url'
 	].join(',');
 
 	for (let pidx = 1; pidx <= maxProductPages && candidateSkus.length < PAGE_SIZE; pidx++) {
