@@ -1,50 +1,48 @@
-// app/deals/bose-qc-ultra-headphones-deal/page.tsx
+// app/deals/sony-wh-1000xm5-deal/page.tsx
 import { MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Image from 'next/image';
 
-export default function BoseHeadphonesDealPage() {
+export default function SonyHeadphonesDealPage() {
+  // Location will be provided via search/zip or browser geolocation at runtime
   const mockDeals = [
-    { store: "Best Buy", price: "$299", status: "IN STOCK", distance: "1.8 mi", pickup: true },
-    { store: "Walmart", price: "$299", status: "LOW STOCK", distance: "2.4 mi", pickup: true },
-    { store: "Amazon", price: "$298", status: "ONLINE ONLY", distance: "N/A", pickup: false },
-    { store: "Target", price: "$329", status: "UNAVAILABLE", distance: "5.5 mi", pickup: false },
+    { store: "Best Buy", price: "$349", status: "IN STOCK", distance: "1.8 mi", pickup: true },
+    { store: "Walmart", price: "$349", status: "LOW STOCK", distance: "2.4 mi", pickup: true },
+    { store: "Amazon", price: "$348", status: "ONLINE ONLY", distance: "N/A", pickup: false },
+    { store: "Target", price: "$399", status: "UNAVAILABLE", distance: "5.5 mi", pickup: false },
   ];
 
-  // Location will be provided via search/zip or browser geolocation at runtime
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-white">
       {/* --- Left Column: Content & Deals --- */}
       <div className="md:w-2/3 p-6 md:p-10">
         <h1 className="text-3xl md:text-5xl font-extrabold text-blue-800 mb-4">
-          Bose QuietComfort Ultra Headphones: Find the $299 Deal In Stock Near You
+          Sony WH-1000XM5 Headphones: Find the $349 Deal In Stock Near You
         </h1>
         <p className="text-gray-600 mb-6">
-          The best price of Black Friday 2025 is **$299** (was $429). Use our live inventory search to find the deal for **local pickup** before it sells out.
+          The best price of Black Friday 2025 is **$349** (was $399). Use our live inventory search to find the deal for **local pickup** before it sells out.
         </p>
 
         {/* --- Image and Key Info --- */}
         <div className="flex flex-col sm:flex-row gap-6 mb-8 border p-4 rounded-lg bg-gray-50">
           <Image
-            src="/bose-qc-ultra.jpg" // Placeholder for an actual image of the product
-            alt="Bose QuietComfort Ultra Headphones"
+            src="https://www.bhphotovideo.com/images/images2500x2500/sony_wh1000xm5_b_wh_1000xm5_wireless_noise_canceling_1703066.jpg" 
+            alt="Sony WH-1000XM5"
             width={150}
             height={150}
             className="rounded-lg object-contain"
           />
           <div>
-            <h2 className="text-2xl font-bold">Current Deal Price: $299</h2>
-            <p className="text-xl text-red-600 font-semibold">SAVE $130 (30% OFF)</p>
+            <h2 className="text-2xl font-bold">Current Deal Price: $349</h2>
+            <p className="text-xl text-red-600 font-semibold">SAVE $50 (12% OFF)</p>
             <p className="text-gray-700 mt-2">Sale Confirmed at: Best Buy, Walmart, Amazon, B&H</p>
           </div>
         </div>
 
         {/* --- Local Inventory Section --- */}
-        <h3 className="text-2xl font-bold mb-4 border-b pb-2">
-          Local Inventory Results Near Your Area
-        </h3>
+        <h3 className="text-2xl font-bold mb-4 border-b pb-2">Local Inventory Results Near Your Area</h3>
 
         <div className="grid grid-cols-1 gap-4">
           {mockDeals.map((deal, index) => (

@@ -7,7 +7,7 @@ export const GEO_COOKIE_KEY = 'user_location';
  * Attempts to get the user's current geo-location and stores it in a cookie.
  * In a real app, this would use an API to convert coordinates to a zip code.
  */
-export async function getGeoLocation() {
+export async function getGeoLocation(): Promise<{ lat: number; lng: number } | undefined> {
   if (typeof window === 'undefined') return;
 
   return new Promise((resolve, reject) => {

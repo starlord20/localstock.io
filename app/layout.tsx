@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import 'leaflet/dist/leaflet.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,10 +25,38 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Impact site verification meta (for affiliate verification) */}
+        <meta name="impact-site-verification" content="09b51f2e-076d-4ca1-809a-8789afa1d915" />
+        {/* Favicon (SVG) */}
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* header kept minimal without logo; logo is rendered on home page */}
+        <header className="w-full border-b bg-white">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" className="inline-flex items-center gap-3">
+              <span className="font-semibold text-lg">LocalStock</span>
+            </a>
+            <nav className="flex items-center gap-3">
+              <a href="/" className="text-sm font-medium text-gray-700 hover:text-gray-900">Home</a>
+              <a href="/search" className="text-sm font-medium text-gray-700 hover:text-gray-900">Search</a>
+              <a href="/privacy" className="text-sm font-medium text-gray-700 hover:text-gray-900">Privacy</a>
+            </nav>
+          </div>
+        </header>
+
+        <main>
+          {children}
+        </main>
+        <footer className="w-full border-t bg-white mt-8">
+          <div className="max-w-5xl mx-auto px-4 py-6 text-sm text-gray-600">
+            <div>© {new Date().getFullYear()} LocalStock.online — All rights reserved.</div>
+            <div className="mt-2">By using this site you agree to our <a href="/privacy" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</div>
+          </div>
+        </footer>
       </body>
     </html>
   );
