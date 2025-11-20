@@ -135,7 +135,7 @@ export async function searchLocalStock(
 		throw new Error("API Key configuration error.");
 	}
 
-	const locationFilter = `area(${zipCode},5)`; // 5-mile radius
+	const locationFilter = `area(${zipCode},50)`; // 50-mile radius
 	const PAGE_SIZE = 10;
 	const FILTER_WORDS = ["applecare", "apple care"];
 
@@ -164,11 +164,14 @@ export async function searchLocalStock(
 	const maxProductPages = 3;
 	const candidateSkus: number[] = [];
 	const showFields = [
-		'accessories.sku','addToCartUrl','bestSellingRank','categoryPath.id','categoryPath.name','color','customerReviewAverage','customerReviewCount','description','details.name','details.value','dollarSavings','features.feature','freeShipping','frequentlyPurchasedWith.sku','image','includedItemList.includedItem','inStoreAvailability','inStoreAvailabilityText','longDescription','manufacturer','mobileUrl','modelNumber','name','onlineAvailability','onlineAvailabilityText','onSale','percentSavings','regularPrice','relatedProducts.sku','salePrice','shortDescription','sku','thumbnailImage','type','upc','url'
+		"color","customerReviewCount","details.name","details.value","dollarSavings","image","inStoreAvailability","manufacturer","mobileUrl","modelNumber","onSale","percentSavings","regularPrice","salePrice","shortDescription","sku","thumbnailImage","type","upc","url"
 	].join(',');
 
 	for (let pidx = 1; pidx <= maxProductPages && candidateSkus.length < PAGE_SIZE; pidx++) {
-		const productSearchUrl = `${BESTBUY_BASE_URL_PRODUCTS}((search=${encodeURIComponent(query)})&onSale=true&condition=new&inStoreAvailability=true)?apiKey=${BESTBUY_API_KEY}&format=json&show=${encodeURIComponent(showFields)}&pageSize=${PAGE_SIZE}&page=${pidx}&sort=salePrice.desc`;
+		const searchTerms = query.split(' ').map(term => `search=${encodeURIComponent(term)}`).join('&');
+		const productSearchUrl = `${BESTBUY_BASE_URL_PRODUCTS}((${searchTerms})&condition=new&inStoreAvailability=true)?apiKey=${BESTBUY_API_KEY}&format=json&show=${encodeURIComponent(showFields)}&pageSize=${PAGE_SIZE}&page=${pidx}&sort=salePrice.desc`;
+		console.log('Best Buy product search URL:', productSearchUrl);
+		console.log('Best Buy product search URL:', productSearchUrl);
 		// Avoid bursts: small delay between pages
 		if (pidx > 1) await delay(250);
 		let prodResp;
@@ -218,6 +221,8 @@ export async function searchLocalStock(
 		}
 	}
 
+	console.log('Candidate SKUs:', candidateSkus);
+
 	const skus: number[] = candidateSkus.slice(0, PAGE_SIZE);
 	if (skus.length === 0) {
 		console.log('No matching SKUs for query; returning empty set');
@@ -225,76 +230,97 @@ export async function searchLocalStock(
 	}
 
 	// Batch store+product call using sku in(...) to avoid per-second throttling
-	const skuList = skus.join(',');
-	const apiUrl = `${BESTBUY_BASE_URL_STORES}(${locationFilter})+products(sku in(${skuList}))?apiKey=${BESTBUY_API_KEY}&format=json&show=storeId,name,distance,products.sku,products.name,products.regularPrice,products.salePrice,products.image,products.inStoreAvailability&pageSize=10`;
-
-		try {
-		// Ensure slot in distributed rate limiter
-		try {
-			await ensureRateAllowed(Number(process.env.BESTBUY_RATE_LIMIT_PER_SEC || '5'));
-		} catch (e) {
-			console.warn('Rate limiter wait failed or timed out, proceeding to fetch:', e);
-		}
-		const response = await fetchWithRetry(apiUrl, { next: { revalidate: 300 } });
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error("Best Buy API Error:", response.status, errorText);
-			throw new Error(`API Request Failed: ${response.status}`);
-		}
-
-		const dataText = await response.text();
-		let data: any;
-		try {
-			data = JSON.parse(dataText);
-		} catch (e) {
-			console.error('Best Buy API: failed to parse JSON response', dataText.slice(0, 1000));
-			return { products: [], page };
-		}
-
-		if (data && Array.isArray(data.stores) && data.stores.length > 0) {
-			const bySku: Record<string, any> = {};
-			for (const store of data.stores) {
-				const storeDistance = store.distance;
-				const products = store.products ?? [];
-				for (const p of products) {
-					const sku = p.sku;
-					if (!sku) continue;
-					if (!p.inStoreAvailability) continue;
-					const existing = bySku[sku];
-					const entry = {
-						sku: sku,
-						name: p.name,
-						regularPrice: p.regularPrice,
-						salePrice: p.salePrice || p.regularPrice,
-						image: p.image,
-						inStoreAvailability: p.inStoreAvailability,
-						storeDistance: storeDistance,
-						url: p.url || p.addToCartUrl || null,
-					};
-					if (!existing || (entry.storeDistance != null && existing.storeDistance == null) || (entry.storeDistance != null && existing.storeDistance != null && entry.storeDistance < existing.storeDistance)) {
-						bySku[sku] = entry;
-					}
-				}
-			}
-
-			const result = { products: Object.values(bySku) as BestBuyProduct[], page };
-			globalAny.__bb_cache.set(cacheKey, { ts: Date.now(), value: result });
-			// set Redis cache if available
+	try {
+		const allProducts: BestBuyProduct[] = [];
+		for (const sk of skus) {
+			const apiUrl = `${BESTBUY_BASE_URL_PRODUCTS}/${sk}/stores.json?postalCode=${zipCode}&apiKey=${BESTBUY_API_KEY}&format=json&show=storeId,storeType,name,city,distance,hours,products.sku,products.name,products.regularPrice,products.salePrice,products.image,products.inStoreAvailability&pageSize=10`;
+			console.log('Best Buy store+product lookup URL:', apiUrl);
+			console.log('Best Buy store+product lookup URL:', apiUrl);
+			// small delay between requests to avoid bursts
+			await delay(200);
 			try {
-				await redisSetJson(cacheKey, { ts: Date.now(), value: result }, CACHE_TTL_MS);
-			} catch (e) {
-				// noop
+				// Ensure slot in distributed rate limiter
+				try {
+					await ensureRateAllowed(Number(process.env.BESTBUY_RATE_LIMIT_PER_SEC || '5'));
+				} catch (e) {
+					console.warn('Rate limiter wait failed or timed out, proceeding to fetch:', e);
+				}
+				const response = await fetchWithRetry(apiUrl, { next: { revalidate: 300 } });
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error("Best Buy API Error:", response.status, errorText);
+					throw new Error(`API Request Failed: ${response.status}`);
+				}
+
+				const dataText = await response.text();
+				let data: any;
+				try {
+					data = JSON.parse(dataText);
+					console.log(`Data for SKU ${sk}:`, JSON.stringify(data, null, 2));
+				} catch (e) {
+					console.error('Best Buy API: failed to parse JSON response', dataText.slice(0, 1000));
+					continue; // Continue to next SKU if JSON parsing fails
+				}
+
+				if (data && Array.isArray(data.stores) && data.stores.length > 0) {
+					const bySku: Record<string, any> = {};
+					for (const store of data.stores) {
+						const storeDistance = store.distance;
+						const products = store.products ?? [];
+						for (const p of products) {
+							const sku = p.sku;
+							if (!sku) continue;
+							if (!p.inStoreAvailability) continue;
+							const existing = bySku[sku];
+							const entry = {
+								sku: sku,
+								name: p.name,
+								regularPrice: p.regularPrice,
+								salePrice: p.salePrice || p.regularPrice,
+								image: p.image,
+								inStoreAvailability: p.inStoreAvailability,
+								storeDistance: storeDistance,
+								url: p.url || p.addToCartUrl || null,
+							};
+							if (!existing || (entry.storeDistance != null && existing.storeDistance == null) || (entry.storeDistance != null && existing.storeDistance != null && entry.storeDistance < existing.storeDistance)) {
+								bySku[sku] = entry;
+							}
+						}
+					}
+					allProducts.push(...(Object.values(bySku) as BestBuyProduct[]));
+				}
+			} catch (err: unknown) {
+				console.error(`Fetch or Parse Error for SKU ${sk}:`, err);
+				continue; // Continue to next SKU if one fails
 			}
-			return result;
 		}
 
-		console.log('Best Buy API returned no stores/products. Raw response head:', JSON.stringify(data).slice(0,1000));
-		return { products: [], page };
+		console.log('Final allProducts:', allProducts);
+
+		// Deduplicate products by SKU, keeping the one with the smallest storeDistance
+		const dedupedProducts: Record<number, BestBuyProduct> = {};
+		for (const product of allProducts) {
+			if (!product.sku) continue;
+			const existing = dedupedProducts[product.sku];
+			if (!existing || (product.storeDistance != null && existing.storeDistance == null) || (product.storeDistance != null && existing.storeDistance != null && product.storeDistance < existing.storeDistance)) {
+				dedupedProducts[product.sku] = product;
+			}
+		}
+
+		const result = { products: Object.values(dedupedProducts), page };
+		console.log('Final result:', result);
+		globalAny.__bb_cache.set(cacheKey, { ts: Date.now(), value: result });
+		// set Redis cache if available
+		try {
+			await redisSetJson(cacheKey, { ts: Date.now(), value: result }, CACHE_TTL_MS);
+		} catch (e) {
+			// noop
+		}
+		return result;
 
 	} catch (err: unknown) {
 		console.error("Fetch or Parse Error:", err);
 		return { products: [], page };
 	}
 }
-

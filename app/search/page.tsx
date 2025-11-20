@@ -151,7 +151,7 @@ export default async function SearchPage({
 
         <SearchControls />
         <div className="flex items-center gap-2 mt-3 mb-2">
-          <span className="text-sm text-gray-600">Best Buy page: {currentPage}</span>
+          <span className="text-sm text-gray-600">Page: {currentPage}</span>
           <div className="ml-auto">
             {currentPage > 1 && (
               <a href={`/search?q=${encodeURIComponent(searchQuery)}${params?.zip ? `&zip=${encodeURIComponent(params.zip)}` : ''}&page=${currentPage - 1}`} className="text-sm px-3 py-1 border rounded mr-2">Prev</a>

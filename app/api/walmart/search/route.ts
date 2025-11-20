@@ -78,7 +78,7 @@ export async function GET(request: Request) {
 
     // 4. Construct the API URL and make the request
     // Use the affiliate proxy endpoint (matches scripts/walmart-test-endpoints.js)
-    let apiUrl = `https://developer.api.walmart.com/api-proxy/service/affil/product/v2/search?query=${encodeURIComponent(query)}`;
+    let apiUrl = `https://developer.api.walmart.com/api-proxy/service/affil/product/v2/search?publisherId=${process.env.WALMART_PUBLISHER_ID}&query=${encodeURIComponent(query)}`;
     if (searchParams.get('zip')) {
       const zipVal = encodeURIComponent(searchParams.get('zip') ?? "");
       apiUrl += `&postalCode=${zipVal}`;
@@ -120,9 +120,10 @@ export async function GET(request: Request) {
             // Per the Affiliate Marketing API docs, prefer the affiliate-marketing-api path.
             const lookupCandidates = [
               // Preferred Affiliate Marketing API path (per docs)
-              `https://developer.api.walmart.com/api-proxy/service/affil/affiliate-marketing-api/v1/product/lookup?itemId=${encodeURIComponent(itemId)}&postalCode=${encodeURIComponent(zip)}`,
+              `https://developer.api.walmart.com/api-proxy/service/affil/product/v2/items?ids=${encodeURIComponent(itemId)}&zipCode=${encodeURIComponent(zip)}&publisherId=${process.env.WALMART_PUBLISHER_ID}`,
+              // https://developer.api.walmart.com/api-proxy/service/affil/product/v2/items?ids=638&zipCode=95054
               // Fallback to the historical product lookup proxy path
-              `https://developer.api.walmart.com/api-proxy/service/affil/product/v1/lookup?itemId=${encodeURIComponent(itemId)}&postalCode=${encodeURIComponent(zip)}`,
+              `https://developer.api.walmart.com/api-proxy/service/affil/product/v2/items?ids=${encodeURIComponent(itemId)}&zipCode=${encodeURIComponent(zip)}`,
             ];
 
             let lookupData: any = null;

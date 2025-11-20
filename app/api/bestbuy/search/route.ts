@@ -30,7 +30,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Best Buy API key is not configured' }, { status: 500 });
   }
 
-  const url = `https://api.bestbuy.com/v1/products((search=${encodeURIComponent(query)})&onSale=true&condition=new&inStoreAvailability=true)?apiKey=${apiKey}&format=json&show=sku,name,salePrice,regularPrice,image,url`;
+  // const url = `https://api.bestbuy.com/v1/products((search=${encodeURIComponent(query)})&condition=new&inStoreAvailability=true)?apiKey=${apiKey}&format=json&show=sku,name,salePrice,regularPrice,image,url`;
+  const url = `https://api.bestbuy.com/v1/products((search=${encodeURIComponent(query)})&inStoreAvailability=true&condition=new)?apiKey=${apiKey}&format=json&show=sku,name,salePrice,regularPrice,image,url&sort=salePrice.dsc`;
   try {
     const response = await fetch(url);
     const data = await response.json();
@@ -40,5 +41,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to fetch data from Best Buy API' }, { status: 500 });
   }
 }
-
-// https://api.bestbuy.com/v1/products((search=airpods)&onSale=true&condition=new&inStoreAvailability=true)?

@@ -49,7 +49,6 @@ export default function HomePage() {
         <div className="flex items-center space-x-2">
           <label htmlFor="home-zip" className="sr-only">ZIP code</label>
           <Input id="home-zip" name="zip" form="search-form" type="text" placeholder="ZIP" className="h-10 w-28 text-sm" aria-label="ZIP code" />
-          <button form="search-form" type="submit" className="px-3 py-2 bg-blue-600 text-white rounded text-sm">Go</button>
         </div>
       </div>
     </main>
